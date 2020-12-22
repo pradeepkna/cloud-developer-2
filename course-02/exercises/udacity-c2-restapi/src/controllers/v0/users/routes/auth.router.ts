@@ -5,8 +5,7 @@ import { User } from '../models/User';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { NextFunction } from 'connect';
-import { config } from '../../../../config/config';
-
+import {config} from '../../../../config/config';
 import * as EmailValidator from 'email-validator';
 
 const router: Router = Router();
@@ -31,12 +30,11 @@ function generateJWT(user: User): string {
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
-    //return next();
-     if (!req.headers || !req.headers.authorization){
-         return res.status(401).send({ message: 'No authorization headers.' });
-     }
-    
 
+    //return next();
+    if (!req.headers || !req.headers.authorization){
+         return res.status(401).send({ message: 'No authorization headers.' });
+    }
      const token_bearer = req.headers.authorization.split(' ');
      if(token_bearer.length != 2){
          return res.status(401).send({ message: 'Malformed token.' });
@@ -50,6 +48,14 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
        }
        return next();
      });
+
+     return jwt.verify(token, "hello", (err, decoded) => {
+       if (err) {
+         return res.status(500).send({ auth: false, message: 'Failed to authenticate.' });
+       }
+       return next();
+     });
+
 }
 
 router.get('/verification', 

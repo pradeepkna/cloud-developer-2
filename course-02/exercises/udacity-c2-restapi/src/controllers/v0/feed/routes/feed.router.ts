@@ -18,13 +18,56 @@ router.get('/', async (req: Request, res: Response) => {
 
 //@TODO
 //Add an endpoint to GET a specific resource by Primary Key
-
-// update a specific resource
-router.patch('/:id', 
-    requireAuth, 
-    async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
+        
         //@TODO try it yourself
-        res.send(500).send("not implemented")
+        // destruct our path params
+        let { id } = req.params;
+
+        // check to make sure the id is set
+        if (!id) { 
+        // respond with an error if not
+         return res.status(400).send(`id is required`);
+        }
+        const item1 = await FeedItem.findByPk(id);
+        
+        if(!item1){
+            return res.status(404).send('Item with the id not found')
+        }
+        else{
+            return res.status(200).send(item1);
+            
+        }
+});
+// update a specific resource
+router.patch('/:id', async (req: Request, res: Response) => {
+        
+        //@TODO try it yourself
+        // destruct our path params
+        let { id } = req.params;
+
+        // check to make sure the id is set
+        if (!id) { 
+        // respond with an error if not
+         return res.status(400).send(`id is really required`);
+        }
+        // destruct our body payload for our variables
+        let { caption1, url1 } = req.body;
+        
+        try {
+        const result = await FeedItem.update(
+        
+          // Set Attribute values 
+            { caption: caption1,
+            url: url1 },
+        
+          // Where clause / criteria 
+            { where: { id: id } } )
+                res.send(200).send("Update successful")
+        } catch (err) {
+                res.send(500).send("FeedItem update failed !");
+        }
+        
 });
 
 
@@ -68,3 +111,7 @@ router.post('/',
 });
 
 export const FeedRouter: Router = router;
+
+function newFunction(url1: any): any {
+    return { url: url1 };
+}

@@ -11,6 +11,8 @@ import * as validUrl from 'valid-url';
   // Set the network port
   const port = process.env.PORT || 8082;
   
+  var filesArray:string[];
+  
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
@@ -25,12 +27,14 @@ import * as validUrl from 'valid-url';
   
   app.get('/filteredimage/', async (req: Request, res: Response) => {
     
+     deleteLocalFiles(filesArray);
+     
     // 1. validate the image_url query
     // destruct our query paramaters
     let { image_url } = req.query;
     //let validUrl = require('valid-url');
   
-    if (validUrl.isUri(image_url)){
+    if (validUrl.isWebUri(image_url)){
         console.log('Looks like an URI');
     } else {
         console.log('Not a URI');
@@ -41,11 +45,13 @@ import * as validUrl from 'valid-url';
     const filteredpath = await filterImageFromURL(image_url);
     
     // 3. send the resulting file in the response
-    res.status(200).sendFile(filteredpath);
+    await res.status(200).sendFile(filteredpath);
     
     // 4. deletes any files on the server on finish of the response
-    var filesArray:string[] = [filteredpath]
-    deleteLocalFiles(filesArray);
+    //var filesArray:string[] = ['/home/ubuntu/environment/Dev/cloud-developer/course-02/project/image-filter-starter-code/src/util/tmp/*']
+    filesArray.push(filteredpath);
+    
+    
 
 });
 

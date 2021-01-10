@@ -1,18 +1,35 @@
-import AWS = require('aws-sdk');
-import { config } from './config/config';
+import AWS = require("aws-sdk");
+import { config } from "./config/config";
 
 const c = config.dev;
 
 //Configure AWS
-var credentials = new AWS.SharedIniFileCredentials({profile: c.aws_profile});
-AWS.config.credentials = credentials;
+//var credentials = new AWS.SharedIniFileCredentials({profile: c.aws_profile});
+//AWS.config.credentials = credentials;
 
-export const s3 = new AWS.S3({
-  signatureVersion: 'v4',
-  region: c.aws_region,
-  params: {Bucket: c.aws_media_bucket}
+//Configure AWS
+if (c.aws_profile && c.aws_profile !== "DEPLOYED"){
+  console.log(`Using AWS_PROFILE=${c.aws_profile}`);
+  var credentials = new AWS.SharedIniFileCredentials({
+    profile: c.aws_profile,
+  });
+  AWS.config.credentials = credentials;
+}
+AWS.config.getCredentials((err) => {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log(
+      `Successfully loaded AWS credentials of type=${AWS.config.credentials.constructor.name}`
+    );
+  }
 });
 
+export const s3 = new AWS.S3({
+  signatureVersion: "v4",
+  region: c.aws_region,
+  params: { Bucket: c.aws_media_bucket },
+});
 
 /* getGetSignedUrl generates an aws signed url to retreive an item
  * @Params
@@ -20,11 +37,11 @@ export const s3 = new AWS.S3({
  * @Returns:
  *    a url as a string
  */
-export function getGetSignedUrl( key: string ): string{
-  const params = { Bucket: c.aws_media_bucket, Key: key, Expires: 60*5}
-  const url: string = s3.getSignedUrl('getObject', params);
+export function getGetSignedUrl(key: string): string {
+  const params = { Bucket: c.aws_media_bucket, Key: key, Expires: 60 * 5 };
+  const url: string = s3.getSignedUrl("getObject", params);
   return url;
-  
+
   /*const signedUrlExpireSeconds = 60 * 5
 
     const url = s3.getSignedUrl('getObject', {
@@ -32,8 +49,6 @@ export function getGetSignedUrl( key: string ): string{
         Key: key,
         Expires: signedUrlExpireSeconds
       }); */
-
-    
 }
 
 /* getPutSignedUrl generates an aws signed url to put an item
@@ -42,14 +57,13 @@ export function getGetSignedUrl( key: string ): string{
  * @Returns:
  *    a url as a string
  */
-export function getPutSignedUrl( key: string ){
-
-    const params = { Bucket: c.aws_media_bucket, Key: key, Expires: 60*5}
-  const url: string = s3.getSignedUrl('putObject', params);
+export function getPutSignedUrl(key: string) {
+  const params = { Bucket: c.aws_media_bucket, Key: key, Expires: 60 * 5 };
+  const url: string = s3.getSignedUrl("putObject", params);
   console.log(url);
   return url;
-    
-    /* const signedUrlExpireSeconds = 60 * 5
+
+  /* const signedUrlExpireSeconds = 60 * 5
 
     const url = s3.getSignedUrl('putObject', {
       Bucket: c.aws_media_bucket,

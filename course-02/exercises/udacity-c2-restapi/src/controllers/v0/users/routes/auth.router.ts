@@ -27,7 +27,7 @@ async function comparePasswords(plainTextPassword: string, hash: string): Promis
 
 function generateJWT(user: User): string {
     //@TODO Use jwt to create a new JWT Payload containing
-    return jwt.sign(user, c.secret);
+    return jwt.sign(user.short(), c.secret);
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -131,6 +131,8 @@ router.post('/', async (req: Request, res: Response) => {
     } catch (e) {
         throw e;
     }
+    
+    //let plainUser = Object.assign({}, savedUser);
 
     // Generate JWT
     const jwt = generateJWT(savedUser);

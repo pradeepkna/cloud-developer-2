@@ -11,8 +11,6 @@ import * as validUrl from 'valid-url';
   // Set the network port
   const port = process.env.PORT || 8082;
   
-  var filesArray:string[];
-  
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
@@ -27,7 +25,7 @@ import * as validUrl from 'valid-url';
   
   app.get('/filteredimage/', async (req: Request, res: Response) => {
     
-     deleteLocalFiles(filesArray);
+     
      
     // 1. validate the image_url query
     // destruct our query paramaters
@@ -45,13 +43,15 @@ import * as validUrl from 'valid-url';
     const filteredpath = await filterImageFromURL(image_url);
     
     // 3. send the resulting file in the response
-    await res.status(200).sendFile(filteredpath);
+    res.status(200).sendFile(filteredpath);
     
     // 4. deletes any files on the server on finish of the response
     //var filesArray:string[] = ['/home/ubuntu/environment/Dev/cloud-developer/course-02/project/image-filter-starter-code/src/util/tmp/*']
-    filesArray.push(filteredpath);
     
-    
+    res.on('finish', () => {
+
+      deleteLocalFiles([filteredpath]);
+    });
 
 });
 
